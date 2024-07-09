@@ -24,11 +24,11 @@ class CallableWithArgs(Callable[[any], any]):
         if len(kwargs): self._args_kwargs += (kwargs, )
 
     def __call__(self, *args, **kwargs) -> any:
-        """ Additional args and kwargs can be prepended to args and kwargs
+        """ Additional args and kwargs can be appended to args and kwargs
             provided in constructor.
         """
         meth_args, meth_kwargs = self._unpack_args_kwargs()
-        return self._method(*args, *meth_args, **kwargs, **meth_kwargs)
+        return self._method(*meth_args, *args, **meth_kwargs, **kwargs)
 
     def _unpack_args_kwargs(self) -> tuple[tuple, dict]:
         if len(self._args_kwargs) == 2: return self._args_kwargs;

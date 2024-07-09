@@ -1,18 +1,23 @@
 import numpy as np
+from typing import Callable
 from simulation.utils.timer import ITimer
 from simulation.utils.observable import Observable
-from simulation.jobs.job import IJob
+from simulation.jobs.job import IJob, Job
 from simulation.resources.resource_interfaces import (
     ISimulatedResource,
 )
 from simulation.simulation.event import (
-    ISimulatedEvent,
     simulated_events_chain,
     simulated_func,
 )
 
 
 class JobGenerator(ISimulatedResource):
+    # _alpha: float - generator speed
+    # _timer: ITimer
+    # _psrng: np.random.RandomState
+    # __observable: IObservable
+
     def __init__(
         self,
         alpha: float,
@@ -21,9 +26,9 @@ class JobGenerator(ISimulatedResource):
     ):
         super().__init__()
         self._alpha = alpha
-        self._psrng = psrng
         self._timer = timer
-        self.insert_job(self._gen_new_job())
+        self._psrng = psrng
+        self.__observable = Observable()
 
     def init(self, timer: ITimer) -> 'JobGenerator':
         self._timer = timer
@@ -32,21 +37,37 @@ class JobGenerator(ISimulatedResource):
     @simulated_events_chain()
     @simulated_func(duration=0)
     def insert_job(self, job: IJob):
+        """ Generator does not take in any jobs. """
         pass
 
-    def process_cur_job(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
-        cur_job = self._cur_job
-        self._on_processed_job(self._cur_job_arrival_time)
-        return cur_job
+    @simulated_events_chain(no_args=True)
+    @simulated_func(duration=0)
+    def is_idle(self) -> bool:
+        return False
 
-    def _gen_eta(self):
+    @simulated_events_chain(no_args=True)
+    @simulated_func(duration=0)
+    def has_jobs_waiting(self) -> int:
+        return 1
+
+    @simulated_events_chain(no_args=True)
+    def process_cur_job(self) -> tuple[float, IJob]:
+        proc_time, job = self._gen_new_job()
+        return proc_time, job
+
+    def subscribe(self, event: str, notify_strategy: Callable) -> Callable:
+        self.__observable.subscribe(event, notify_strategy)
+
+    def unsubscribe(self, event: str, notify_strategy: Callable) -> Callable:
+        self.__observable.unsubscribe(event, notify_strategy)
+
+    def _notify(self, event: str, *args, **kwargs):
+        self.__observable.notify(event, *args, **kwargs)
+
+    def _num_subscribers(self, event: str) -> int:
+        return self.__observable.num_subscribers(event)
+
+    def _gen_new_job(self) -> tuple[float, IJob]:
         generation_duration = self._psrng.exponential(1 / self._alpha)
-        eta = self._timer._now() + generation_duration
-        return eta
-
-    def _gen_new_job(self) -> IJob:
-        return Job(self._timer._now())
-
-    def _process_cur_job(self, dummy) -> tuple[float, tuple[IJob, float]]:
-        job, start_processing_at = self._jobs.popleft()
-        return self._proc_time, (job, start_processing_at)
+        job = Job(self._timer.now())
+        return generation_duration, job

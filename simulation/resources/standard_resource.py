@@ -7,8 +7,6 @@ from simulation.resources.resource_interfaces import (
     ISimulatedResource,
 )
 from simulation.simulation.event import (
-    ISimulatedEvent,
-    SimulatedEvent,
     simulated_func,
     simulated_events_chain,
 )
@@ -16,9 +14,7 @@ from simulation.simulation.event import (
 
 class StandardResource(ISimulatedResource):
     """ Subject in decorator design pattern. """
-    # _jobs[0] = (job being processed, start_of_proc_time)
-    # _jobs[1 : ] = (job waiting, start_of_waiting_time)
-    # _jobs: deque[tuple[IJob, float]]
+    # _jobs: deque[IJob]
     # _proc_time: float - avg processing time of a job
     # _timer: ITimer
     # __observable: IObservable
@@ -37,7 +33,7 @@ class StandardResource(ISimulatedResource):
     @simulated_events_chain()
     @simulated_func(duration=0)
     def insert_job(self, job: IJob) -> None:
-        self._jobs.append((job, self._timer.now()))
+        self._jobs.append(job)
 
     @simulated_events_chain()
     @simulated_func(duration=0)
@@ -49,9 +45,10 @@ class StandardResource(ISimulatedResource):
     def has_jobs_waiting(self) -> int:
         return len(self._jobs) - 1
 
-    def process_cur_job(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
-        event = SimulatedEvent(self._process_cur_job)
-        return event, event
+    @simulated_events_chain()
+    def process_cur_job(self) -> tuple[float, IJob]:
+        job = self._jobs.popleft()
+        return self._proc_time, job
 
     def subscribe(self, event: str, notify_strategy: Callable) -> Callable:
         self.__observable.subscribe(event, notify_strategy)
@@ -64,7 +61,3 @@ class StandardResource(ISimulatedResource):
 
     def _num_subscribers(self, event: str) -> int:
         return self.__observable.num_subscribers(event)
-
-    def _process_cur_job(self, dummy) -> tuple[float, tuple[IJob, float]]:
-        job, start_processing_at = self._jobs.popleft()
-        return self._proc_time, (job, start_processing_at)

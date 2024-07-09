@@ -53,7 +53,7 @@ class SimulatedNetwork(INetwork):
         """ Starts processing on all resources that are ready.
         """
         @simulated_func(duration=0)
-        def process_if_idle(is_idle: bool, resource, idx):
+        def process_if_idle(resource, idx, is_idle: bool):
             if is_idle:
                 first, last = resource.process_cur_job()
                 last.then(self._on_resource_processed_job, idx)
@@ -139,8 +139,8 @@ class SimulatedNetwork(INetwork):
     @simulated_func(duration=0)
     def _on_resource_processed_job(
         self,
+        resource_idx: int,
         job: IJob,
-        resource_idx: int
     ) -> ISimulatedEvent:
         next_resource_idx = self._next_resource_idx(resource_idx)
         self._process_next_job_if_any(resource_idx)

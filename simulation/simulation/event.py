@@ -113,13 +113,12 @@ def simulated_func(duration: float):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            body = lambda: duration, func(*args, **kwargs)
-            return body
+            return duration, func(*args, **kwargs)
         return wrapper
     return decorator
 
 
-def simulated_events_chain():
+def simulated_events_chain(no_args: bool=False):
     """ Returns decorator that creates an event
         from given simulated function and returns
         that event as first and last events in the
@@ -128,7 +127,12 @@ def simulated_events_chain():
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            event = SimulatedEvent(func, *args, **kwargs)
+            if no_args:
+                event = SimulatedEvent(
+                    lambda *_, **__: func(*args, **kwargs)
+                )
+            else:
+                event = SimulatedEvent(func, *args, **kwargs)
             return event, event
         return wrapper
     return decorator
