@@ -1,0 +1,12 @@
+
+K	Rel Throughput CPU	Rel Throughput Sd1	Rel Throughput Sd2	Rel Throughput Sd3	Rel Throughput Usr disk 1	Rel Throughput Usr disk 2
+2	1.562	0.417	0.313	0.208	0.500	0.500
+
+K	Rel Throughput CPU	Rel Throughput Sd1	Rel Throughput Sd2	Rel Throughput Sd3	Rel Throughput Usr disk 1	Rel Throughput Usr disk 2	Rel Throughput Usr disk 3
+3	1.562	0.417	0.313	0.208	0.333	0.333	0.333
+
+K	Rel Throughput CPU	Rel Throughput Sd1	Rel Throughput Sd2	Rel Throughput Sd3	Rel Throughput Usr disk 1	Rel Throughput Usr disk 2	Rel Throughput Usr disk 3	Rel Throughput Usr disk 4
+4	1.562	0.417	0.313	0.208	0.250	0.250	0.250	0.250
+
+K	Rel Throughput CPU	Rel Throughput Sd1	Rel Throughput Sd2	Rel Throughput Sd3	Rel Throughput Usr disk 1	Rel Throughput Usr disk 2	Rel Throughput Usr disk 3	Rel Throughput Usr disk 4	Rel Throughput Usr disk 5
+5	1.562	0.417	0.313	0.208	0.200	0.200	0.200	0.200	0.200

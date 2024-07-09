@@ -28,6 +28,7 @@ PATH_REL_FLOWS_RESULTS_ANALYTICALLY = r'./throughputs_analytical.csv'
 
 PATH_ALL_RESULTS_ANALYTICALLY = r'./results_analytical.csv'
 
+PATH_ALPHA_MAX_PLOT = r'./alpha_max.png'
 
 
 # SIMULATED SOLUTION CONFIG:

@@ -22,6 +22,7 @@ def main():
         config.SERVICE_TIMES[-1],
         config.PROBS,
         config.RESOURCES_ALIASES[1 : ],
+        config.PATH_ALPHA_MAX_PLOT,
     )
 
     analyse_all(
@@ -84,7 +85,7 @@ def extract_generator_from_probs(probs: np.array):
     return probs, alphas_relative
 
 
-def anavlyse(
+def analyse(
     num_usr_disks: int,
     alpha_scaling_factor: float,
     ser_times: np.array,
@@ -151,10 +152,10 @@ def calc_throughputs(probs: np.array, alphas: np.array):
     return lambdas
 
 
-def calc_alpha_max_from_throughput(serv_times: np.array, lambdas_relative: np.arvray):
+def calc_alpha_max_from_throughput(serv_times: np.array, lambdas_relative: np.array):
     # compute the max_alpha so that each lambda_i <= mu_i = 1 / Si
     # lambdas = max_alpha * lambdas_relative <= 1 / S
-    max_alphas = 1 / ser_times / lambdas_relative
+    max_alphas = 1 / serv_times / lambdas_relative
     max_alpha_idx = np.argmin(max_alphas)
     max_alpha = max_alphas[max_alpha_idx]
     # add indices of all max_alpha occurrances in max_alphas
@@ -165,7 +166,7 @@ def calc_alpha_max_from_throughput(serv_times: np.array, lambdas_relative: np.ar
     return max_alpha, np.array(max_alpha_indices, dtype=np.uint)
 
 
-def analyse_relative_throughvputs(
+def analyse_relative_throughputs(
     num_usr_disks_range,
     ser_times_no_usr_disks: list[float],
     ser_time_usr_disk: float,
@@ -204,12 +205,13 @@ def analyse_relative_throughvputs(
     return
 
 
-def analyse_alpha_vmaxs(
+def analyse_alpha_maxs(
     num_usr_disks_range,
     ser_times_no_usr_disks: list[float],
     ser_time_usr_disk: float,
     probs_no_usr_disks: list[float],
     resources_aliases_no_usr_disks: list[str],
+    plt_file_path: str=None,
 ):
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
@@ -240,6 +242,8 @@ def analyse_alpha_vmaxs(
     ax.set_xticks([ val for val in num_usr_disks_range ])
     ax.set_ylabel('alpha_max')
     plt.title(f'alpha_max(K)')
+    if plt_file_path is not None:
+        plt.savefig(plt_file_path)
     plt.show()
 
 
