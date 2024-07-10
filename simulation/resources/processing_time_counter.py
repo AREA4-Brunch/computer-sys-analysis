@@ -1,4 +1,3 @@
-from typing import Callable
 from simulation.utils.timer import ITimer
 from simulation.jobs.job import IJob
 from simulation.resources.resource_interfaces import (
@@ -10,7 +9,6 @@ from simulation.simulation.event import (
     simulated_events_chain_provider,
 )
 from simulation.metrics.resource_metrics import ISimulatedResourceMetrics
-
 
 
 class ProcessingTimeCounter(ISimulatedResource):
@@ -64,15 +62,3 @@ class ProcessingTimeCounter(ISimulatedResource):
         self._metrics.add_processing_jobs_cnt(1)
         self._metrics.add_processing_time_of_jobs(proc_time)
         return job
-
-    def subscribe(self, event: str, notify_strategy: Callable) -> Callable:
-        self._resource.subscribe(event, notify_strategy)
-
-    def unsubscribe(self, event: str, notify_strategy: Callable) -> Callable:
-        self._resource.unsubscribe(event, notify_strategy)
-
-    def _notify(self, event: str, *args, **kwargs):
-        self._resource._notify(event, *args, **kwargs)
-
-    def _num_subscribers(self, event: str) -> int:
-        return self._resource._num_subscribers(event)
