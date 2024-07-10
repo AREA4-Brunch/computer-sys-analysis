@@ -2,7 +2,10 @@ import abc
 import functools
 from typing import Callable
 from simulation.scheduler import ITasksScheduler
-from simulation.utils.callable_wrappers import CallableWithArgs
+from computer_sys_analysis.simulation.utils.callable import (
+    CallableWithArgs,
+    does_callable_take_arguments,
+)
 
 
 class ISimulatedEvent(abc.ABC):
@@ -29,6 +32,10 @@ class ISimulatedEvent(abc.ABC):
             and returns `last`.
             Useful to make some code cleaner.
         """
+        pass
+
+    @abc.abstractmethod
+    def does_take_args(self) -> bool:
         pass
 
 
@@ -70,12 +77,17 @@ class SimulatedEvent(ISimulatedEvent):
             To fetch the result of execution chain a `then`
             before calling this function.
         """
+        # do not check self.does_take_args() to pass prev_args or not;
+        # only way for prev_args to be provided if the func does not
+        # take any is that if user explicitly provided them in first
+        # call of execute so user should handle the error
         duration, ret_val = self._func(*prev_args, **prev_kwargs)
         for next in self._nexts:
+            cur_ret = (ret_val,) if next.does_take_args() else tuple()
             if duration == 0:  # no need to overload scheduler
-                next.execute(scheduler, ret_val)
+                next.execute(scheduler, *cur_ret)
             else:
-                scheduler.add(duration, next.execute, scheduler, ret_val)
+                scheduler.add(duration, next.execute, scheduler, *cur_ret)
 
     def then(self, *args, **kwargs) -> ISimulatedEvent:
         """ Given event executes after the func provided in
@@ -105,34 +117,32 @@ class SimulatedEvent(ISimulatedEvent):
         self.then(first, *args, **kwargs)
         return last
 
+    def does_take_args(self) -> bool:
+        return does_callable_take_arguments(self._func)
+
 
 def simulated_func(duration: float):
     """ Returns decorator that creates a simulated
         function out of given function.
     """
     def decorator(func):
-        @functools.wraps(func)
+        @functools.wraps(func)  # !crucial for object methods
         def wrapper(*args, **kwargs):
             return duration, func(*args, **kwargs)
         return wrapper
     return decorator
 
 
-def simulated_events_chain(no_args: bool=False):
+def simulated_events_chain_provider():
     """ Returns decorator that creates an event
         from given simulated function and returns
         that event as first and last events in the
         simulated execution of given sim func.
     """
     def decorator(func):
-        @functools.wraps(func)
+        @functools.wraps(func)  # !crucial for object methods
         def wrapper(*args, **kwargs):
-            if no_args:
-                event = SimulatedEvent(
-                    lambda *_, **__: func(*args, **kwargs)
-                )
-            else:
-                event = SimulatedEvent(func, *args, **kwargs)
+            event = SimulatedEvent(func, *args, **kwargs)
             return event, event
         return wrapper
     return decorator

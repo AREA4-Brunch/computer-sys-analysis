@@ -1,3 +1,4 @@
+import inspect
 from typing import Callable
 
 
@@ -35,3 +36,14 @@ class CallableWithArgs(Callable[[any], any]):
         if isinstance(self._args_kwargs, dict):  # only kwargs was stored
             return (tuple(), self._args_kwargs[0])
         return (self._args_kwargs[0], dict())
+
+
+def does_callable_take_arguments(func: callable):
+    """ If callable is a class method, `self` arg does not count.
+    """
+    singature = inspect.signature(func)
+    params_iter = iter(singature.parameters.values())
+    first_param = next(params_iter, None)
+    if first_param is None: return False;
+    if first_param.name != 'self': return True;
+    return next(params_iter, None) is not None

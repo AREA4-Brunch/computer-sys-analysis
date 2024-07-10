@@ -1,9 +1,7 @@
 import abc
 from typing import Callable
 from simulation.jobs.job import IJob
-from simulation.utils.observable import IObservable
 from simulation.simulation.event import ISimulatedEvent
-from simulation.utils.timer import ITimer
 
 
 class IResourceObservable(abc.ABC):
@@ -26,10 +24,6 @@ class IResourceObservable(abc.ABC):
 
 class IResource(IResourceObservable):
     @abc.abstractmethod
-    def init(self, timer: ITimer) -> 'IResource':
-        pass
-
-    @abc.abstractmethod
     def insert_job(self, job: IJob):
         pass
 
@@ -44,19 +38,22 @@ class IResource(IResourceObservable):
         pass
 
     @abc.abstractmethod
+    def num_jobs(self) -> int:
+        """ Returns total number of jobs waiting or being processed.
+        """
+        pass
+
+    @abc.abstractmethod
     def process_cur_job(self) -> IJob:
         pass
 
 
 class ISimulatedResource(IResourceObservable):
     @abc.abstractmethod
-    def init(self, timer: ITimer) -> 'ISimulatedResource':
-        pass
-
-    @abc.abstractmethod
     def insert_job(
         self,
-        job: IJob,
+        *args,
+        **kwargs
     ) -> tuple[ISimulatedEvent, ISimulatedEvent]:
         pass
 
@@ -71,5 +68,13 @@ class ISimulatedResource(IResourceObservable):
     @abc.abstractmethod
     def has_jobs_waiting(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
         """ Returns positive number if any jobs are waiting.
+        """
+        pass
+
+    @abc.abstractmethod
+    def num_jobs(self) -> int:
+        """ Returns total number of jobs waiting or being processed.
+            Not a step in the simulation; used for describing the state
+            during the simulation.
         """
         pass

@@ -7,7 +7,7 @@ from simulation.resources.resource_interfaces import (
     ISimulatedResource,
 )
 from simulation.simulation.event import (
-    simulated_events_chain,
+    simulated_events_chain_provider,
     simulated_func,
 )
 
@@ -34,23 +34,23 @@ class JobGenerator(ISimulatedResource):
         self._timer = timer
         return self
 
-    @simulated_events_chain()
+    @simulated_events_chain_provider()
     @simulated_func(duration=0)
     def insert_job(self, job: IJob):
         """ Generator does not take in any jobs. """
         pass
 
-    @simulated_events_chain(no_args=True)
+    @simulated_events_chain_provider()
     @simulated_func(duration=0)
     def is_idle(self) -> bool:
         return False
 
-    @simulated_events_chain(no_args=True)
+    @simulated_events_chain_provider()
     @simulated_func(duration=0)
     def has_jobs_waiting(self) -> int:
         return 1
 
-    @simulated_events_chain(no_args=True)
+    @simulated_events_chain_provider()
     def process_cur_job(self) -> tuple[float, IJob]:
         proc_time, job = self._gen_new_job()
         return proc_time, job

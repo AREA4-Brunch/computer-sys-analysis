@@ -151,7 +151,7 @@ class SimulatedNetwork(INetwork):
         def insert_then_process_if_idle(is_idle: bool):
             first, last = next_resource.insert_job(job)
             if not is_idle:
-                last.then(next_resource.process_cur_job()[0])
+                last.then_(next_resource.process_cur_job())
             first.execute()
         last_event.then(insert_then_process_if_idle)
         first_event.execute()
