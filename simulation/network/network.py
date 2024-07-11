@@ -2,18 +2,31 @@ import abc
 import numpy as np
 import logging
 import bisect
-from typing import Iterable
+from typing import Iterable, Callable
 from simulation.resources.resource_interfaces import ISimulatedResource
 from simulation.simulation.scheduler import ITasksScheduler
 from simulation.jobs.job import IJob
 from simulation.utils.timer import ITimer
 from simulation.simulation.event import (
-    ISimulatedEvent,
     simulated_func,
 )
+from simulation.utils.observable import Observable
 
 
-class INetwork(abc.ABC):
+class INetworkObservable(abc.ABC):
+    @abc.abstractmethod
+    def subscribe(self, event: any, notify_strategy: Callable):
+        pass
+
+    @abc.abstractmethod
+    def unsubscribe(self, event: any, notify_strategy: Callable):
+        pass
+
+
+class INetwork(INetworkObservable):
+    class Event:
+        ON_JOB_LEAVE_NETWORK = 1  # push: (job: IJob, left_net_time: float)
+
     @abc.abstractmethod
     def start(self, scheduler: ITasksScheduler):
         pass
@@ -26,12 +39,14 @@ class SimulatedNetwork(INetwork):
     # _name: str
     # _logger: logging.Logger
     # _log_prefix: str - prefix prepended to every logger call
+    # __observable: IObservable
 
     def __init__(
         self,
         resources: list[ISimulatedResource],
         probs: Iterable,
         psrng: np.random.RandomState,
+        timer: ITimer,
         logger: logging.Logger=None,
         name: str='',
     ) -> None:
@@ -42,12 +57,15 @@ class SimulatedNetwork(INetwork):
         self._resources = resources
         self._probs = self._construct_transition_probs(probs)
         self._psrng = psrng
+        self._timer = timer
         self._init_resources_etas()
+        self.__observable = Observable()
 
-    def init(self, timer: ITimer) -> 'SimulatedNetwork':
-        for resource in self._resources:
-            resource.init(timer)
-        return self
+    def subscribe(self, event: any, notify_strategy: Callable):
+        self.__observable.subscribe(event, notify_strategy)
+
+    def unsubscribe(self, event: any, notify_strategy: Callable):
+        self.__observable.unsubscribe(event, notify_strategy)
 
     def start(self, scheduler: ITasksScheduler):
         """ Starts processing on all resources that are ready.
@@ -63,6 +81,9 @@ class SimulatedNetwork(INetwork):
             start, end = resource.is_idle()
             end.then(process_if_idle, resource, idx)
             start.execute(scheduler)
+
+    def _notify(self, event: any, *args, **kwargs):
+        self.__observable._notify(event, *args, **kwargs)
 
     def _construct_transition_probs(self, probs: Iterable):
         has_not_warned_about_sys_leave = True
@@ -109,12 +130,12 @@ class SimulatedNetwork(INetwork):
             return False
 
         # provided probabilities sum up to less than 1 and leftover prob
-        # will be treated as prob of leaving the system from `src` resource
+        # will be treated as prob of leaving the network from `src` resource
         if do_log_independent_warning:
             self._logger.warning(
                 f'{self._log_prefix} Warning: All leftover probabilities'
               + f'(1 - sum(row_probs)) of each prob matrix row will represent'
-              + f' probability of leaving the system.'
+              + f' probability of leaving the network.'
             )
 
         self._logger.warning(
@@ -132,7 +153,7 @@ class SimulatedNetwork(INetwork):
         prob = self._psrng.uniform(0., 1.)
         idx = bisect.bisect_right(self._probs[src], (prob, 0))
         if idx >= len(self._probs[src]):
-            return -1  # leaves the system after src
+            return -1  # leaves the network after src
         dst = self._probs[src][idx][1]
         return dst
 
@@ -141,10 +162,12 @@ class SimulatedNetwork(INetwork):
         self,
         resource_idx: int,
         job: IJob,
-    ) -> ISimulatedEvent:
+    ):
         next_resource_idx = self._next_resource_idx(resource_idx)
         self._process_next_job_if_any(resource_idx)
-        if next_resource_idx < 0: return;  # job leaves the system now
+        if next_resource_idx < 0:  # job leaves the network now
+            self._on_job_leave_network(job)
+            return
         next_resource = self._resources[next_resource_idx]
         first_event, last_event = next_resource.is_idle()
         @simulated_func(duration=0)
@@ -165,3 +188,10 @@ class SimulatedNetwork(INetwork):
                 resource.process_cur_job()[0].execute()
         last_event.then(process_if_any)
         first_event.execute()
+
+    def _on_job_leave_network(self, job: IJob):
+        self._notify(
+            SimulatedNetwork.Event.ON_JOB_LEAVE_NETWORK,
+            job,
+            self._timer.now(),
+        )

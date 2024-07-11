@@ -60,12 +60,22 @@ class ResourceMetrics(ISimulatedResourceMetrics):
 
     def set_total_time_passed(self, duration: float):
         self.total_time = duration
+        self._validate_total_time()
 
     def calc_throughput(self) -> float:
+        self._validate_total_time()
         return self.processed_jobs_cnt_total / self.total_time
 
     def calc_usage(self) -> float:
+        self._validate_total_time()
         return self.processing_time_of_jobs_total / self.total_time
 
     def calc_num_jobs_over_time(self) -> float:
+        self._validate_total_time()
         return self.jobs_cnt_during_time / self.total_time
+
+    def _validate_total_time(self):
+        if self.total_time <= 0:
+            raise ValueError(
+                f'Total time passed must be set to positive value.'
+            )

@@ -1,6 +1,6 @@
 import abc
 from typing import Callable
-from utils.observable import Observable
+from utils.observable import IObservable, Observable
 from simulation.utils.timer import ITimer, Timer
 from simulation.scheduler import ITasksScheduler, TasksScheduler
 
@@ -11,19 +11,15 @@ class ISimulationObservable(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def unsubscribe(self, event: any, notify_strategy: Callable) -> Callable:
-        pass
-
-    @abc.abstractmethod
-    def _notify(self, event: any, *args, **kwargs):
-        pass
-
-    @abc.abstractmethod
-    def _num_subscribers(self, event: any) -> int:
+    def unsubscribe(self, event: any, notify_strategy: Callable):
         pass
 
 
 class ISimulation(ISimulationObservable):
+    class Event:
+        ON_START = 1
+        ON_END   = 2
+
     @abc.abstractmethod
     def simulate(self, duration: float):
         pass
@@ -41,27 +37,21 @@ class Simulation(ISimulation):
     """ Leaf node in composite design pattern.
         Pull configuration of the observer design pattern.
     """
-    class Event:
-        ON_START = 1
-        ON_END   = 2
+    # __observable: IObservable
+    # _timer: ITimer | None
+    # _scheduler: ITasksScheduler | None
 
     def __init__(self):
         super().__init__()
-        self.__observable = Observable()
+        self.__observable: IObservable = Observable()
         self._timer = None
         self._scheduler = None
 
-    def subscribe(self, event: str, notify_strategy: Callable) -> Callable:
+    def subscribe(self, event: str, notify_strategy: Callable):
         self.__observable.subscribe(event, notify_strategy)
 
-    def unsubscribe(self, event: str, notify_strategy: Callable) -> Callable:
+    def unsubscribe(self, event: str, notify_strategy: Callable):
         self.__observable.unsubscribe(event, notify_strategy)
-
-    def _notify(self, event: str, *args, **kwargs):
-        self.__observable.notify(event, *args, **kwargs)
-
-    def _num_subscribers(self, event: str) -> int:
-        return self.__observable.num_subscribers(event)
 
     def simulate(self, duration: float):
         """ Starts the simulation that lasts until the time in
@@ -91,36 +81,42 @@ class Simulation(ISimulation):
         """
         return self._scheduler
 
+    def _notify(self, event: str, *args, **kwargs):
+        self.__observable.notify(event, *args, **kwargs)
+
     def _on_sim_start(self):
         self._notify(Simulation.Event.ON_START, self)
 
     def _on_sim_end(self):
         self._notify(Simulation.Event.ON_END, self)
 
-    # def _create_network(self, timer: ITimer) -> INetwork:
-    #     resources = self._create_resources()
-    #     net = SimulatedNetwork(
-    #         resources,
-    #         self._probs,
-    #         self._psrng,
-    #         self._logger,
-    #         f'{self._name}-NETWORK'
-    #     ).init(timer)
-
-    # def _create_resources(self) -> list[ISimulatedResource]:
-    #     pass
-
 
 class ParallelSimulations(ISimulation):
     """ Composite in composite design pattern. """
+    # _sims: list[ISimulation]
 
     def __init__(self) -> None:
         super().__init__()
-        self._sims = []
+        self._sims: list[ISimulation] = []
+
+    def add(self, simulation: ISimulation) -> 'ParallelSimulations':
+        self._sims.append(simulation)
+        return self
+
+    def subscribe(self, event: str, notify_strategy: Callable):
+        for sim in self._sims:
+            sim.subscribe(event, notify_strategy)
+
+    def unsubscribe(self, event: str, notify_strategy: Callable):
+        for sim in self._sims:
+            sim.unsubscribe(event, notify_strategy)
 
     def simulate(self, duration: float):
         for sim in self._sims:
             sim.simulate(duration)
 
-    def add(self, simulation: ISimulation):
-        self._sims.append(simulation)
+    def timer(self) -> ITimer:
+        return None
+
+    def scheduler(self) -> ITasksScheduler:
+        return None

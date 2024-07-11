@@ -5,11 +5,11 @@ from typing import Callable
 
 class IObservable(abc.ABC):
     @abc.abstractmethod
-    def subscribe(self, event: any, notify_strategy: Callable) -> Callable:
+    def subscribe(self, event: any, notify_strategy: Callable):
         pass
 
     @abc.abstractmethod
-    def unsubscribe(self, event: any, notify_strategy: Callable) -> Callable:
+    def unsubscribe(self, event: any, notify_strategy: Callable):
         pass
 
     @abc.abstractmethod
@@ -32,10 +32,10 @@ class Observable(IObservable):
     def __init__(self):
         self._subscribers = defaultdict(lambda: [])
 
-    def subscribe(self, event: any, notify_strategy: Callable) -> Callable:
-        return self._subscribe(event, notify_strategy)
+    def subscribe(self, event: any, notify_strategy: Callable):
+        self._subscribers[event].append(notify_strategy)
 
-    def unsubscribe(self, event: any, notify_strategy: Callable) -> Callable:
+    def unsubscribe(self, event: any, notify_strategy: Callable):
         self._subscribers[event].remove(notify_strategy)
 
     def notify(self, event: any, *args, **kwargs):
@@ -44,7 +44,3 @@ class Observable(IObservable):
 
     def num_subscribers(self, event: any) -> int:
         return len(self._subscribers[event])
-
-    def _subscribe(self, event: any, notify_strategy: Callable) -> Callable:
-        self._subscribers[event].append(notify_strategy)
-        return notify_strategy

@@ -2,7 +2,9 @@ import abc
 
 
 class IJob(abc.ABC):
-    pass
+    @abc.abstractmethod
+    def created_at(self) -> float:
+        pass
 
 
 class Job(IJob):
@@ -10,3 +12,6 @@ class Job(IJob):
 
     def __init__(self, created_at: float):
         self.created_at = created_at
+
+    def created_at(self) -> float:
+        return self.created_at
