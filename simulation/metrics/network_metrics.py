@@ -1,6 +1,6 @@
 import abc
-from simulation.network.network import INetwork
-from simulation.jobs.job import IJob
+from ..network.network import INetwork
+from ..jobs.job import IJob
 
 
 class INetworkMetrics(abc.ABC):
@@ -13,7 +13,7 @@ class INetworkMetrics(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def calc_avg_recall_time(self) -> float:
+    def calc_recall_time(self) -> float:
         pass
 
     @abc.abstractmethod
@@ -35,27 +35,19 @@ class NetworkMetrics(INetworkMetrics):
         self.total_recall_time += total_recall_time
         self.total_num_jobs += total_num_jobs
 
-    def calc_avg_recall_time(self) -> float:
+    def calc_recall_time(self) -> float:
+        if self.total_num_jobs == 0: return 0;  # avoid div by 0
         return self.total_recall_time / self.total_num_jobs
 
     def get_num_jobs_left_sys(self) -> int:
         return self.total_num_jobs
 
-
-class NetworkMetricsFactory:
-    # _net: INetwork
-
-    def __init__(self, net: INetwork) -> None:
-        self._net = net
-
-    def create_metrics(self) -> NetworkMetrics:
-        metrics = NetworkMetrics()
-
-        def add_recall_time(job: IJob, left_net_time: float):
-            recall_time = left_net_time - job.created_at()
-            metrics.add_recall_time(recall_time, 1)
-
-        self._net.subscribe(
+    def register_to_net(self, net: INetwork):
+        net.subscribe(
             INetwork.Event.ON_JOB_LEAVE_NETWORK,
-            add_recall_time
+            self._on_job_leave_net
         )
+
+    def _on_job_leave_net(self, job: IJob, left_net_time: float):
+        recall_time = left_net_time - job.created_at()
+        self.add_recall_time(recall_time, 1)

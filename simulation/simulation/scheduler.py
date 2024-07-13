@@ -1,6 +1,6 @@
 import abc
 import heapq
-from simulation.utils.timer import ITimer
+from ..utils.timer import ITimer
 
 
 class ITasksScheduler(abc.ABC):
@@ -14,7 +14,7 @@ class ITasksScheduler(abc.ABC):
 
 class TasksScheduler(ITasksScheduler):
     # _timer: ITimer
-    # _tasks: heap of tuples: (scheduled_at, (func, args if any, kwargs if any))
+    # _tasks: SortedDict - _tasks[time] = deque[(func, args, kwargs)]
 
     def __init__(self, timer: ITimer) -> None:
         """ Because of singleton only first constructor call
@@ -22,21 +22,26 @@ class TasksScheduler(ITasksScheduler):
             require any args to be passed.
         """
         self._timer = timer
-        self._tasks = heapq.heapify([])
+        self._tasks = []
+        self._next_task_id = 1
 
     def __bool__(self):
         return bool(self._tasks)
 
     def add(self, schedule_in: float, func: callable, *args, **kwargs):
         # store args and kwargs in tuple only if they were provided
-        schedule_at = self._timer._now + schedule_in
-        task_desc = (func)
-        if (len(args)): task_desc += (args,)
+        schedule_at = self._timer.now() + schedule_in
+        task_desc = (func,)
+        if len(args): task_desc += (args,)
         if len(kwargs): task_desc += (kwargs,)
-        heapq.heappush(self._tasks, (schedule_at, task_desc))
+        heapq.heappush(
+            self._tasks, (schedule_at, self._next_task_id, task_desc)
+        )
+        self._next_task_id += 1
 
     def next(self) -> tuple[callable, tuple, dict]:
-        schedule_at, task_desc = heapq.heappop(self._tasks)
+        schedule_at, task_id, task_desc = heapq.heappop(self._tasks)
+        if not self._tasks: self._next_task_id = 0;
         # unpack task_desc and where missing add empty args, kwargs
         return self._unpack_task_desc(task_desc)
 

@@ -1,11 +1,11 @@
 import abc
-from simulation.resources.resource_interfaces import ISimulatedResource
-from simulation.resources.standard_resource import StandardResource
-from simulation.resources.job_generator import JobGenerator
-from simulation.metrics.resource_metrics import ISimulatedResourceMetrics
-from simulation.resources.processing_time_counter import ProcessingTimeCounter
-from simulation.resources.jobs_counter import JobsCounter
-from simulation.utils.timer import ITimer
+from .resource_interfaces import ISimulatedResource
+from .standard_resource import StandardResource
+from .job_generator import JobGenerator
+from ..metrics.resource_metrics import ISimulatedResourceMetrics
+from .processing_time_counter import ProcessingTimeCounter
+from .jobs_counter import JobsCounter
+from ..utils.timer import ITimer
 
 
 class IFactoryMethodConfig(abc.ABC):
@@ -60,13 +60,13 @@ class ResourceFactory(IResourceFactory):
 
 
 class MetricsTrackingFactoryMethodConfig(IFactoryMethodConfig):
-    # to_track: dict
+    # to_track: set
 
     def __init__(
         self,
-        to_track: dict,
-        timer: ITimer,
-        metrics_registry: ISimulatedResourceMetrics,
+        to_track: set=set(),
+        timer: ITimer=None,
+        metrics_registry: ISimulatedResourceMetrics=None,
     ) -> None:
         super().__init__()
         self.to_track = to_track
@@ -102,6 +102,7 @@ class MetricsTrackingResourceFactory(IResourceFactory):
         return resource
 
     def _add_metrics_trackers(
+        self,
         resource: ISimulatedResource,
         config: MetricsTrackingFactoryMethodConfig,
     ) -> ISimulatedResource:

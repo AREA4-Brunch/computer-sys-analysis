@@ -20,5 +20,5 @@ class Timer(ITimer):
     def now(self) -> float:
         return self._now
 
-    def now(self, new_time: float):
+    def set_now(self, new_time: float):
         self._now = new_time

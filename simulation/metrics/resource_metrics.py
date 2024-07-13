@@ -18,7 +18,7 @@ class ISimulatedResourceMetrics(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def set_total_time_passed(self, duration: float):
+    def add_total_time_passed(self, duration: float):
         """ Set total time over which metrics were being gathered/added.
         """
         pass
@@ -58,24 +58,17 @@ class ResourceMetrics(ISimulatedResourceMetrics):
     def add_jobs_cnt_during_time(self, count_time: float):
         self.jobs_cnt_during_time += count_time
 
-    def set_total_time_passed(self, duration: float):
-        self.total_time = duration
-        self._validate_total_time()
+    def add_total_time_passed(self, duration: float):
+        self.total_time += duration
 
     def calc_throughput(self) -> float:
-        self._validate_total_time()
+        if self.total_time == 0: return 0;
         return self.processed_jobs_cnt_total / self.total_time
 
     def calc_usage(self) -> float:
-        self._validate_total_time()
+        if self.total_time == 0: return 0;
         return self.processing_time_of_jobs_total / self.total_time
 
     def calc_num_jobs_over_time(self) -> float:
-        self._validate_total_time()
+        if self.total_time == 0: return 0;
         return self.jobs_cnt_during_time / self.total_time
-
-    def _validate_total_time(self):
-        if self.total_time <= 0:
-            raise ValueError(
-                f'Total time passed must be set to positive value.'
-            )

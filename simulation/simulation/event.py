@@ -1,11 +1,8 @@
 import abc
 import functools
 from typing import Callable
-from simulation.scheduler import ITasksScheduler
-from computer_sys_analysis.simulation.utils.callable import (
-    CallableWithArgs,
-    does_callable_take_arguments,
-)
+from .scheduler import ITasksScheduler
+from ..utils.callable import num_remaining_args
 
 
 class ISimulatedEvent(abc.ABC):
@@ -23,8 +20,7 @@ class ISimulatedEvent(abc.ABC):
     @abc.abstractmethod
     def then_(
         self,
-        first: 'ISimulatedEvent',
-        last: 'ISimulatedEvent',
+        first_last: tuple['ISimulatedEvent', 'ISimulatedEvent'],
         *args,
         **kwargs
     ) -> 'ISimulatedEvent':
@@ -60,9 +56,17 @@ class SimulatedEvent(ISimulatedEvent):
             execution and its return value in that order.
         """
         super().__init__()
-        if args or kwargs:
-            func = CallableWithArgs(func, args, kwargs)
-
+        # create memory efficient wrappers to store args and kwargs
+        # to avoid adding attributes to this class if none were provided
+        args_missing = num_remaining_args(func) - len(args) - len(kwargs)
+        if args_missing > 1:
+            raise ValueError(
+                f'Given function is yet to be provided {args_missing} args'
+                + f', but at most 1 can be returned via event chaining.'
+            )
+        self._args_kwargs = (args_missing,)
+        if len(args): self._args_kwargs += (args, )
+        if len(kwargs): self._args_kwargs += (kwargs, )
         self._func = func
         self._nexts = []
 
@@ -77,11 +81,12 @@ class SimulatedEvent(ISimulatedEvent):
             To fetch the result of execution chain a `then`
             before calling this function.
         """
-        # do not check self.does_take_args() to pass prev_args or not;
+        # do not check self._func takes args to pass prev_args or not;
         # only way for prev_args to be provided if the func does not
         # take any is that if user explicitly provided them in first
         # call of execute so user should handle the error
-        duration, ret_val = self._func(*prev_args, **prev_kwargs)
+        fargs, fkwargs = self._unpack_args_kwargs()
+        duration, ret_val = self._func(*fargs, *prev_args, **fkwargs, **prev_kwargs)
         for next in self._nexts:
             cur_ret = (ret_val,) if next.does_take_args() else tuple()
             if duration == 0:  # no need to overload scheduler
@@ -109,16 +114,23 @@ class SimulatedEvent(ISimulatedEvent):
 
     def then_(
         self,
-        first: ISimulatedEvent,
-        last: ISimulatedEvent,
+        first_last: tuple[ISimulatedEvent, ISimulatedEvent],
         *args,
         **kwargs
     ) -> ISimulatedEvent:
-        self.then(first, *args, **kwargs)
-        return last
+        self.then(first_last[0], *args, **kwargs)
+        return first_last[1]
 
     def does_take_args(self) -> bool:
-        return does_callable_take_arguments(self._func)
+        return self._args_kwargs[0] > 0
+
+    def _unpack_args_kwargs(self) -> tuple[tuple, dict]:
+        if len(self._args_kwargs) == 2: 
+            if isinstance(self._args_kwargs[1], dict):  # only kwargs stored
+                return (tuple(), self._args_kwargs[1])
+            return (self._args_kwargs[1], dict())
+        if len(self._args_kwargs) == 3: return self._args_kwargs;
+        return (tuple(), dict())
 
 
 def simulated_func(duration: float):

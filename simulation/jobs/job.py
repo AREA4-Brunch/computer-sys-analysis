@@ -8,10 +8,10 @@ class IJob(abc.ABC):
 
 
 class Job(IJob):
-    # created_at - time job has arrived in the net
+    # creation_time - time job has arrived in the net
 
     def __init__(self, created_at: float):
-        self.created_at = created_at
+        self.creation_time = created_at
 
     def created_at(self) -> float:
-        return self.created_at
+        return self.creation_time

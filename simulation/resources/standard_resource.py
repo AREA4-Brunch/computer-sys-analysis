@@ -1,9 +1,9 @@
 from collections import deque
-from simulation.jobs.job import IJob
-from simulation.resources.resource_interfaces import (
+from ..jobs.job import IJob
+from .resource_interfaces import (
     ISimulatedResource,
 )
-from simulation.simulation.event import (
+from ..simulation.event import (
     simulated_func,
     simulated_events_chain_provider,
 )
@@ -23,11 +23,12 @@ class StandardResource(ISimulatedResource):
     @simulated_func(duration=0)
     def insert_job(self, job: IJob) -> None:
         self._jobs.append(job)
+        return None
 
     @simulated_events_chain_provider()
     @simulated_func(duration=0)
     def is_idle(self) -> bool:
-        return bool(self._jobs)
+        return not bool(self._jobs)
 
     @simulated_events_chain_provider()
     @simulated_func(duration=0)

@@ -1,10 +1,10 @@
 import numpy as np
-from simulation.utils.timer import ITimer
-from simulation.jobs.job import IJob, Job
-from simulation.resources.resource_interfaces import (
+from ..utils.timer import ITimer
+from ..jobs.job import IJob, Job
+from .resource_interfaces import (
     ISimulatedResource,
 )
-from simulation.simulation.event import (
+from ..simulation.event import (
     simulated_events_chain_provider,
     simulated_func,
 )
@@ -26,15 +26,11 @@ class JobGenerator(ISimulatedResource):
         self._timer = timer
         self._psrng = psrng
 
-    def init(self, timer: ITimer) -> 'JobGenerator':
-        self._timer = timer
-        return self
-
     @simulated_events_chain_provider()
     @simulated_func(duration=0)
     def insert_job(self, job: IJob):
         """ Generator does not take in any jobs. """
-        return
+        return None
 
     @simulated_events_chain_provider()
     @simulated_func(duration=0)
@@ -49,7 +45,11 @@ class JobGenerator(ISimulatedResource):
     @simulated_events_chain_provider()
     def process_cur_job(self) -> tuple[float, IJob]:
         proc_time, job = self._gen_new_job()
+        # return round(proc_time), job  # makes time in whole sim int, not float
         return proc_time, job
+
+    def num_jobs(self) -> int:
+        return 1
 
     def _gen_new_job(self) -> tuple[float, IJob]:
         generation_duration = self._psrng.exponential(1 / self._alpha)

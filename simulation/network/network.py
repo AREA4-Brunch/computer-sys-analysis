@@ -3,14 +3,14 @@ import numpy as np
 import logging
 import bisect
 from typing import Iterable, Callable
-from simulation.resources.resource_interfaces import ISimulatedResource
-from simulation.simulation.scheduler import ITasksScheduler
-from simulation.jobs.job import IJob
-from simulation.utils.timer import ITimer
-from simulation.simulation.event import (
+from ..resources.resource_interfaces import ISimulatedResource
+from ..simulation.scheduler import ITasksScheduler
+from ..jobs.job import IJob
+from ..utils.timer import ITimer
+from ..simulation.event import (
     simulated_func,
 )
-from simulation.utils.observable import Observable
+from ..utils.observable import Observable
 
 
 class INetworkObservable(abc.ABC):
@@ -44,7 +44,7 @@ class SimulatedNetwork(INetwork):
     def __init__(
         self,
         resources: list[ISimulatedResource],
-        probs: Iterable,
+        probs: Iterable[float],
         psrng: np.random.RandomState,
         timer: ITimer,
         logger: logging.Logger=None,
@@ -58,7 +58,7 @@ class SimulatedNetwork(INetwork):
         self._probs = self._construct_transition_probs(probs)
         self._psrng = psrng
         self._timer = timer
-        self._init_resources_etas()
+        self._scheduler: ITasksScheduler = None
         self.__observable = Observable()
 
     def subscribe(self, event: any, notify_strategy: Callable):
@@ -68,24 +68,28 @@ class SimulatedNetwork(INetwork):
         self.__observable.unsubscribe(event, notify_strategy)
 
     def start(self, scheduler: ITasksScheduler):
-        """ Starts processing on all resources that are ready.
+        """ Starts processing on all resources that have
+            a job to process.
         """
+        self._scheduler = scheduler
+
         @simulated_func(duration=0)
-        def process_if_idle(resource, idx, is_idle: bool):
-            if is_idle:
+        def process_if_not_idle(resource, idx, is_idle: bool):
+            if not is_idle:
                 first, last = resource.process_cur_job()
                 last.then(self._on_resource_processed_job, idx)
                 first.execute(scheduler)
+            return
 
         for idx, resource in enumerate(self._resources):
-            start, end = resource.is_idle()
-            end.then(process_if_idle, resource, idx)
-            start.execute(scheduler)
+            first, last = resource.is_idle()
+            last.then(process_if_not_idle, resource, idx)
+            first.execute(scheduler)
 
     def _notify(self, event: any, *args, **kwargs):
-        self.__observable._notify(event, *args, **kwargs)
+        self.__observable.notify(event, *args, **kwargs)
 
-    def _construct_transition_probs(self, probs: Iterable):
+    def _construct_transition_probs(self, probs: Iterable[float]):
         has_not_warned_about_sys_leave = True
         probs_offseted = []
         for src, dst_probs in enumerate(probs):
@@ -173,11 +177,18 @@ class SimulatedNetwork(INetwork):
         @simulated_func(duration=0)
         def insert_then_process_if_idle(is_idle: bool):
             first, last = next_resource.insert_job(job)
-            if not is_idle:
-                last.then_(next_resource.process_cur_job())
-            first.execute()
+            if is_idle:
+                last.then_(
+                    next_resource.process_cur_job()
+                ).then(
+                    self._on_resource_processed_job,
+                    next_resource_idx,
+                )
+            first.execute(self._scheduler)
+            return
         last_event.then(insert_then_process_if_idle)
-        first_event.execute()
+        first_event.execute(self._scheduler)
+        return
 
     def _process_next_job_if_any(self, resource_idx):
         resource: ISimulatedResource = self._resources[resource_idx]
@@ -185,9 +196,12 @@ class SimulatedNetwork(INetwork):
         @simulated_func(duration=0)
         def process_if_any(jobs_waiting: int):
             if jobs_waiting > 0:
-                resource.process_cur_job()[0].execute()
+                first, last = resource.process_cur_job()
+                last.then(self._on_resource_processed_job, resource_idx)
+                first.execute(self._scheduler)
+            return
         last_event.then(process_if_any)
-        first_event.execute()
+        first_event.execute(self._scheduler)
 
     def _on_job_leave_network(self, job: IJob):
         self._notify(
