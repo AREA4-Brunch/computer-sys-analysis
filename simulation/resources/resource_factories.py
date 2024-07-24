@@ -59,7 +59,7 @@ class ResourceFactory(IResourceFactory):
         )
 
 
-class MetricsTrackingFactoryMethodConfig(IFactoryMethodConfig):
+class MetricsTrackingConfig(IFactoryMethodConfig):
     # to_track: set
 
     def __init__(
@@ -77,7 +77,7 @@ class MetricsTrackingFactoryMethodConfig(IFactoryMethodConfig):
 class MetricsTrackingResourceFactory(IResourceFactory):
     def create_std_resource(
         self,
-        config: MetricsTrackingFactoryMethodConfig,
+        config: MetricsTrackingConfig,
         *resource_constructor_args,
         **resource_constructor_kwargs,
     ) -> StandardResource:
@@ -90,7 +90,7 @@ class MetricsTrackingResourceFactory(IResourceFactory):
 
     def create_job_generator(
         self,
-        config: MetricsTrackingFactoryMethodConfig,
+        config: MetricsTrackingConfig,
         *resource_constructor_args,
         **resource_constructor_kwargs,
     ) -> JobGenerator:
@@ -104,7 +104,7 @@ class MetricsTrackingResourceFactory(IResourceFactory):
     def _add_metrics_trackers(
         self,
         resource: ISimulatedResource,
-        config: MetricsTrackingFactoryMethodConfig,
+        config: MetricsTrackingConfig,
     ) -> ISimulatedResource:
         if 'throughput' or 'usage' in config.to_track:
             resource = ProcessingTimeCounter(

@@ -1,4 +1,6 @@
 import abc
+import concurrent.futures
+import threading
 from typing import Callable
 from ..utils.observable import IObservable, Observable
 from ..utils.timer import ITimer, Timer
@@ -100,7 +102,7 @@ class Simulation(ISimulation):
         return self._duration
 
 
-class ConsecutiveSimulations(ISimulation):
+class SequentialSimulations(ISimulation):
     """ Composite in composite design pattern. """
     # _sims: list[ISimulation]
 
@@ -108,7 +110,7 @@ class ConsecutiveSimulations(ISimulation):
         super().__init__()
         self._sims: list[ISimulation] = []
 
-    def add(self, simulation: ISimulation) -> 'ConsecutiveSimulations':
+    def add(self, simulation: ISimulation) -> 'SequentialSimulations':
         self._sims.append(simulation)
         return self
 
@@ -123,6 +125,97 @@ class ConsecutiveSimulations(ISimulation):
     def simulate(self, duration: float):
         for sim in self._sims:
             sim.simulate(duration)
+
+    def timer(self) -> ITimer:
+        return None
+
+    def scheduler(self) -> ITasksScheduler:
+        return None
+
+    def duration(self) -> float:
+        duration = 0
+        for sim in self._sims:
+            duration += sim.duration()
+        return duration
+
+
+class MultiThreadedSimulations(ISimulation):
+    """ Composite in composite design pattern.
+        Uses `threading` module, does not utilize CPU's multiple cores.
+    """
+    # _sims: list[ISimulation]
+
+    def __init__(self, max_workers: int | None=None) -> None:
+        super().__init__()
+        self._sims: list[ISimulation] = []
+        self._max_workers = max_workers
+
+    def add(self, simulation: ISimulation) -> 'MultiThreadedSimulations':
+        self._sims.append(simulation)
+        return self
+
+    def subscribe(self, event: str, notify_strategy: Callable):
+        for sim in self._sims:
+            sim.subscribe(event, notify_strategy)
+
+    def unsubscribe(self, event: str, notify_strategy: Callable):
+        for sim in self._sims:
+            sim.unsubscribe(event, notify_strategy)
+
+    def simulate(self, duration: float):
+        threads = []
+        for sim in self._sims:
+            thread = threading.Thread(target=sim.simulate, args=(duration,))
+            threads.append(thread)
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+    def timer(self) -> ITimer:
+        return None
+
+    def scheduler(self) -> ITasksScheduler:
+        return None
+
+    def duration(self) -> float:
+        duration = 0
+        for sim in self._sims:
+            duration += sim.duration()
+        return duration
+
+
+class MultiProcessedSimulations(ISimulation):
+    """ Composite in composite design pattern.
+        Uses `concurrent` module, utilizes CPU's multiple cores.
+    """
+    # _sims: list[ISimulation]
+
+    def __init__(self, max_workers: int | None=None) -> None:
+        super().__init__()
+        self._sims: list[ISimulation] = []
+        self._max_workers = max_workers
+
+    def add(self, simulation: ISimulation) -> 'MultiProcessedSimulations':
+        self._sims.append(simulation)
+        return self
+
+    def subscribe(self, event: str, notify_strategy: Callable):
+        for sim in self._sims:
+            sim.subscribe(event, notify_strategy)
+
+    def unsubscribe(self, event: str, notify_strategy: Callable):
+        for sim in self._sims:
+            sim.unsubscribe(event, notify_strategy)
+
+    def simulate(self, duration: float):
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=self._max_workers,
+        ) as executor:
+            futures = [
+                executor.submit(sim.simulate, duration)
+                for sim in self._sims
+            ]
+            concurrent.futures.as_completed(futures)
 
     def timer(self) -> ITimer:
         return None

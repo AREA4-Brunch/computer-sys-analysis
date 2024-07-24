@@ -30,7 +30,7 @@ class Observable(IObservable):
     # _subscribers: dict, subscribers[event] = [ notify_strategies... ]
 
     def __init__(self):
-        self._subscribers = defaultdict(lambda: [])
+        self._subscribers = defaultdict(list)
 
     def subscribe(self, event: any, notify_strategy: Callable):
         self._subscribers[event].append(notify_strategy)

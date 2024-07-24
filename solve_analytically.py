@@ -7,6 +7,7 @@ from common import (
     add_user_disks,
     store_results,
     extract_generator_from_probs,
+    create_or_clear_file,
 )
 
 
@@ -140,14 +141,10 @@ def analyse_relative_throughputs(
     resources_aliases_no_usr_disks: list[str],
     file_path,
 ):
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    with open(file_path, 'w') as file:
-        pass  # clear the file
-
+    create_or_clear_file(file_path)
     # display all at once so all data would share one header with
     # all resource aliases which are constructed at the end
     rels_throughputs_output = []
-
     for num_usr_disks in num_usr_disks_range:
         serv_times, probs, resources_aliases = add_user_disks(
             num_usr_disks,
@@ -158,7 +155,7 @@ def analyse_relative_throughputs(
         )
         probs, alphas_relative = extract_generator_from_probs(probs)
         rel_throughputs = calc_throughputs(probs, alphas_relative)
-
+        # add to file output
         rels_throughputs_output.append((num_usr_disks, rel_throughputs))
 
     headers = [ 'K - num of user disks' ]  # use only the last one's aliases
@@ -185,7 +182,6 @@ def analyse_alpha_maxs(
 ):
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-
     max_alphas = []
     for num_usr_disks in num_usr_disks_range:
         serv_times, probs, resources_aliases = add_user_disks(
@@ -196,7 +192,6 @@ def analyse_alpha_maxs(
             resources_aliases_no_usr_disks,
         )
         probs, alphas_relative = extract_generator_from_probs(probs)
-
         max_alpha, critical_resources_indices = calc_alpha_max(
             probs,
             alphas_relative,
@@ -228,10 +223,7 @@ def analyse_all(
     resources_aliases_no_usr_disks: list[str],
     results_file_path,
 ):
-    os.makedirs(os.path.dirname(results_file_path), exist_ok=True)
-    with open(results_file_path, 'w') as file:
-        pass  # clear the file
-
+    create_or_clear_file(results_file_path)
     for num_usr_disks in num_usr_disks_range:
         for alpha_scaling_factor in alpha_scaling_factors_range:
             serv_times, probs, resources_aliases = add_user_disks(
@@ -242,7 +234,6 @@ def analyse_all(
                 resources_aliases_no_usr_disks,
             )
             probs, alphas_relative = extract_generator_from_probs(probs)
-
             ( usages, throughputs, nums_jobs, network_recall,
               critical_resources,
             ) = analyse(
@@ -253,7 +244,6 @@ def analyse_all(
                 alphas_relative,
                 resources_aliases
             )
-
             store_results(
                 num_usr_disks,
                 alpha_scaling_factor,
@@ -267,7 +257,6 @@ def analyse_all(
             )
 
     print(f'\nStored all results to file:\n{results_file_path}\n')
-
     return
 
 

@@ -93,3 +93,8 @@ def store_results(
             ]
         )
 
+
+def create_or_clear_file(file_path):
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    with open(file_path, 'w') as file:
+        pass  # clear the file

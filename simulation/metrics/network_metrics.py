@@ -29,11 +29,11 @@ class NetworkMetrics(INetworkMetrics):
 
     def add_recall_time(
         self,
-        total_recall_time: float,
-        total_num_jobs: int,
+        recall_time: float,
+        num_jobs: int,
     ):
-        self.total_recall_time += total_recall_time
-        self.total_num_jobs += total_num_jobs
+        self.total_recall_time += recall_time
+        self.total_num_jobs += num_jobs
 
     def calc_recall_time(self) -> float:
         if self.total_num_jobs == 0: return 0;  # avoid div by 0
