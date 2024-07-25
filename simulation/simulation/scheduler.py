@@ -12,6 +12,7 @@ class TasksScheduler(ITasksScheduler):
             will execute, others will be ignored and will not
             require any args to be passed.
         """
+        super().__init__()
         self._timer = timer
         self._tasks = []
         self._next_task_id = 1

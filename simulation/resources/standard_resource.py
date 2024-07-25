@@ -1,8 +1,6 @@
 from collections import deque
 from ..jobs.job import IJob
-from .resource_interfaces import (
-    ISimulatedResource,
-)
+from .resource_interfaces import ISimulatedResource
 from ..core.event import (
     simulated_func,
     simulated_events_chain_provider,

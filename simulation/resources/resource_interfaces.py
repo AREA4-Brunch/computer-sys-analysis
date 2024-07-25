@@ -13,7 +13,7 @@ class IResource(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def has_jobs_waiting(self) -> int:
+    def has_jobs(self) -> int:
         """ Returns positive number if any jobs are waiting.
         """
         pass

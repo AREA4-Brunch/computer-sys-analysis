@@ -2,26 +2,31 @@
 # COMMON CONFIG
 
 
-K_RANGE = [ i for i in range(0, 6) ]  # num of usr disks to add
+K_RANGE = [ i for i in range(0, 6) ]  # num of usr disks to add to the network
 
-R_RANGE = [ 0.3, 0.55, 0.8, 1.0 ]  # generator's alpha's scaling factor
+R_RANGE = [ 0.3, 0.55, 0.8, 1.0 ]  # generator's alpha's scaling factors
 
 # use names in results instead of their indices in PROBS and SERVICE_TIMES_MS
 RESOURCES_ALIASES = [ 'Generator', 'CPU', 'Sd1', 'Sd2', 'Sd3' ]
 
-# PROBS[src][dst] = prob of task completed on src going to dst
+# PROBS[src][dst] = prob of task completed on `src`` to go to `dst`
 #                   if row does not sum up to 1 rest is prob of task leaving net
+# later in code the `PROBS` gets extended by some number of user disks for all
+# values in `K_RANGE` and the rest of the prob (summing up to 1 row-wise) gets split
+# equally across those user disks
 PROBS = [
-    # generator cpu   Sd1   Sd2   Sd3
+    # generator cpu   Sd1   Sd2   Sd3      Di... (usr disks)
     [ 0.,       1,    0,    0,    0    ],
     [ 0.,       0.15, 0.2,  0.15, 0.1, ],
     [ 0.,       0.35, 0.25, 0,    0,   ],
     [ 0.,       0.35, 0,    0.25, 0,   ],
     [ 0.,       0.35, 0,    0,    0.25,],
+    # ...
+    # Di (usr disks)
 ]
 
 # service time of generator (alpha) is not a param (is computed dynamically)
-#                   cpu   Sd1   Sd2   Sd3  Di
+#                   cpu   Sd1   Sd2   Sd3  Di (usr disk)
 SERVICE_TIMES_MS = [ 4,  10,   15,   15,  25 ]  # [ms]
 
 
