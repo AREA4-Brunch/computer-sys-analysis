@@ -4,12 +4,10 @@ import logging
 import bisect
 from typing import Iterable, Callable
 from ..resources.resource_interfaces import ISimulatedResource
-from ..simulation.scheduler import ITasksScheduler
+from ..core.scheduler import ITasksScheduler
 from ..jobs.job import IJob
-from ..utils.timer import ITimer
-from ..simulation.event import (
-    simulated_func,
-)
+from ..core.timer import ITimer
+from ..core.event import simulated_func
 from ..utils.observable import Observable
 
 
@@ -72,19 +70,8 @@ class SimulatedNetwork(INetwork):
             a job to process.
         """
         self._scheduler = scheduler
-
-        @simulated_func(duration=0)
-        def process_if_not_idle(resource, idx, is_idle: bool):
-            if not is_idle:
-                first, last = resource.process_cur_job()
-                last.then(self._on_resource_processed_job, idx)
-                first.execute(scheduler)
-            return
-
-        for idx, resource in enumerate(self._resources):
-            first, last = resource.is_idle()
-            last.then(process_if_not_idle, resource, idx)
-            first.execute(scheduler)
+        for idx in range(len(self._resources)):
+            self._process_next_job_if_any(idx)
 
     def _notify(self, event: any, *args, **kwargs):
         self.__observable.notify(event, *args, **kwargs)
@@ -168,44 +155,52 @@ class SimulatedNetwork(INetwork):
         job: IJob,
     ):
         next_resource_idx = self._next_resource_idx(resource_idx)
-        self._process_next_job_if_any(resource_idx)
         if next_resource_idx < 0:  # job leaves the network now
             self._on_job_leave_network(job)
-            return
-        next_resource = self._resources[next_resource_idx]
-        first_event, last_event = next_resource.is_idle()
-        @simulated_func(duration=0)
-        def insert_then_process_if_idle(is_idle: bool):
-            first, last = next_resource.insert_job(job)
-            if is_idle:
-                last.then_(
-                    next_resource.process_cur_job()
-                ).then(
-                    self._on_resource_processed_job,
-                    next_resource_idx,
-                )
-            first.execute(self._scheduler)
-            return
-        last_event.then(insert_then_process_if_idle)
-        first_event.execute(self._scheduler)
-        return
+        else:  # job leaves to next resource
+            next_resource = self._resources[next_resource_idx]
+            first_event, last_event = next_resource.is_idle()
+            @simulated_func(duration=0)
+            def insert_then_process_if_were_idle(is_idle: bool):
+                first, last = next_resource.insert_job(job)
+                if is_idle and resource_idx != next_resource_idx:
+                    last.then_(
+                        next_resource.process_cur_job()
+                    ).then(
+                        self._on_resource_processed_job,
+                        next_resource_idx,
+                    )
+                first.execute(self._scheduler)
+            last_event.then(insert_then_process_if_were_idle)
+            first_event.execute(self._scheduler)
+        # !important process resource_idx after possible insertion
+        # of next_resource since possible resource_idx == next_resource_idx
+        self._process_next_job_if_any(resource_idx)
 
     def _process_next_job_if_any(self, resource_idx):
+        """ Called when resource is IDLE to process next if any. """
         resource: ISimulatedResource = self._resources[resource_idx]
-        first_event, last_event = resource.has_jobs_waiting()
+        first_event, last_event = resource.has_jobs()
         @simulated_func(duration=0)
-        def process_if_any(jobs_waiting: int):
-            if jobs_waiting > 0:
+        def process_if_any(has_jobs: int):
+            if has_jobs > 0:
                 first, last = resource.process_cur_job()
                 last.then(self._on_resource_processed_job, resource_idx)
                 first.execute(self._scheduler)
-            return
         last_event.then(process_if_any)
         first_event.execute(self._scheduler)
 
     def _on_job_leave_network(self, job: IJob):
         self._notify(
-            SimulatedNetwork.Event.ON_JOB_LEAVE_NETWORK,
+            INetwork.Event.ON_JOB_LEAVE_NETWORK,
             job,
             self._timer.now(),
         )
+
+    def __str__(self):
+        out = '[\n'
+        out += f'Time: {self._timer.now()}\n'
+        for idx, resource in enumerate(self._resources):
+            out += f'Resource #{idx}:\n{resource}\n'
+        out += f'\n{self._scheduler}'
+        return out + '\n]'

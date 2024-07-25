@@ -1,17 +1,18 @@
 import os
 import numpy as np
 import logging
-import time  # for debugging
+import time
 import multiprocessing
 import config
 from typing import Iterable, Callable
-from simulation.simulation.simulation import (
+from simulation.simulation import (
     ISimulation,
     Simulation,
+    SequentialSimulations,
     MultiProcessedSimulations,
 )
-from simulation.utils.timer import ITimer
-from simulation.simulation.scheduler import ITasksScheduler
+from simulation.core.timer import ITimer
+from simulation.core.scheduler import ITasksScheduler
 from simulation.resources.resource_interfaces import ISimulatedResource
 from simulation.resources.resource_factories import (
     MetricsTrackingResourceFactory,
@@ -29,11 +30,10 @@ from common import (
 from solve_analytically import calc_alpha_max
 
 
-PATH_CWD = os.path.dirname(os.path.realpath(__file__))
-
-
 
 def main():
+    path_cwd = os.path.dirname(os.path.realpath(__file__))
+
     # run once for all (K, R) and store results
     _exec_and_measure_time(
         f'simulate_all (num_reruns=1)',
@@ -44,14 +44,14 @@ def main():
         config.SERVICE_TIMES_MS[-1],
         config.PROBS,
         config.RESOURCES_ALIASES,
-        os.path.join(PATH_CWD, config.PATH_SIMULATION_RESULTS),
+        os.path.join(path_cwd, config.PATH_SIMULATION_RESULTS),
         num_reruns=1,
         # cause service times are in [ms]
         sim_max_duration=config.SIMULATION_DURATION_MINS * 60 * 1000,
         seed=None,
     )
 
-    # avg out results of multiple reruns and store results
+    # avg out results of multiple parallel reruns for all (K, R) and store results
     _exec_and_measure_time(
         f'simulate_all (num_reruns={config.SIMULATION_AVG_NUM_RERUNS})',
         simulate_all,
@@ -61,7 +61,7 @@ def main():
         config.SERVICE_TIMES_MS[-1],
         config.PROBS,
         config.RESOURCES_ALIASES,
-        os.path.join(PATH_CWD, config.PATH_SIMULATIONS_AVG_RESULTS),
+        os.path.join(path_cwd, config.PATH_SIMULATIONS_AVG_RESULTS),
         num_reruns=config.SIMULATION_AVG_NUM_RERUNS,
         # cause service times are in [ms]
         sim_max_duration=config.SIMULATION_DURATION_MINS * 60 * 1000,
@@ -174,7 +174,10 @@ def simulate(
     seed: int=0,
     max_workers: int | None=None,  # None for max cores available
 ) -> tuple[list[float], list[float], list[float], float]:
-    simulation = MultiProcessedSimulations(max_workers)
+    simulation = (
+        SequentialSimulations() if num_reruns <= 1
+        else MultiProcessedSimulations()
+    )
     for _ in range(num_reruns):
         simulation.add(Simulation())
     manager = multiprocessing.Manager()
@@ -387,7 +390,8 @@ class OnSimulationEnd:
             # log real time and sim time duration of the simulation:
             real_time_sim_end = time.time()
             real_time_duration = real_time_sim_end - self._real_time_sim_start
-            self._logger.info(f'SIMULATION #{self._sim_idx} IS OVER.')
+            self._logger.info(f'SIMULATION #{self._sim_idx} IS OVER')
+            self._logger.info(f'NUM JOBS LEFT SYS: {self._net_metrics.get_num_jobs_left_sys()}')
             self._logger.info(f'REAL TIME DURATION [sec]: {real_time_duration}')
             self._logger.info(f'SIMULATED TIME DURATION [sec]: {duration / 1000}')
 

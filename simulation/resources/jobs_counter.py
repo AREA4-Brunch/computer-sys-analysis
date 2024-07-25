@@ -1,8 +1,8 @@
-from ..utils.timer import ITimer
+from ..core.timer import ITimer
 from .resource_interfaces import (
     ISimulatedResource,
 )
-from ..simulation.event import (
+from ..core.event import (
     ISimulatedEvent,
     simulated_func,
     simulated_events_chain_provider,
@@ -15,6 +15,8 @@ class JobsCounter(ISimulatedResource):
     # _resource: ISimulatedResource
     # _timer: ITimer
     # _metrics: ISimulatedResourceMetrics
+    # _last_measurement_time: float
+    # _last_measurement_num_jobs: int
 
     def __init__(
         self,
@@ -26,6 +28,8 @@ class JobsCounter(ISimulatedResource):
         self._resource = subject_resource
         self._timer = timer
         self._metrics = metrics
+        self._last_measurement_time = self._timer.now()
+        self._last_measurement_num_jobs = 0
 
     def insert_job(
         self,
@@ -39,8 +43,8 @@ class JobsCounter(ISimulatedResource):
     def is_idle(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
         return self._process_sim_func(self._resource.is_idle)
 
-    def has_jobs_waiting(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
-        return self._process_sim_func(self._resource.has_jobs_waiting)
+    def has_jobs(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+        return self._process_sim_func(self._resource.has_jobs)
 
     def process_cur_job(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
         return self._process_sim_func(self._resource.process_cur_job)
@@ -54,29 +58,35 @@ class JobsCounter(ISimulatedResource):
         *args,
         **kwargs
     ) -> tuple[ISimulatedEvent, ISimulatedEvent]:
-        metrics = { 'start_time': 0 }
-        first, last = self._before_resource_sim_func(metrics)
+        first, last = self._before_resource_sim_func()
         last = last.then_(
             sim_events_chain_provider(*args, **kwargs)
         ).then(
-            self._after_resource_sim_func, metrics
+            self._after_resource_sim_func
         )
         return first, last
 
     @simulated_events_chain_provider()
     @simulated_func(duration=0)
-    def _before_resource_sim_func(self, metrics: dict, prev_ret_val=None):
+    def _before_resource_sim_func(self, prev_ret_val=None):
         """ prev_ret_val=None because there may have been no events before
             and no args were provided in `ISimulatedEvent.execute`
         """
-        metrics['start_time'] = self._timer.now()
-        metrics['num_jobs'] = self._resource.num_jobs()
+        elapsed_time = self._timer.now() - self._last_measurement_time
+        jobs_time = elapsed_time * self._last_measurement_num_jobs
+        self._metrics.add_jobs_cnt_during_time(jobs_time)
+        self._last_measurement_time = self._timer.now()
+        self._last_measurement_num_jobs = self._resource.num_jobs()
         return prev_ret_val
 
     @simulated_func(duration=0)
-    def _after_resource_sim_func(self, metrics: dict, prev_ret_val):
-        proc_time = self._timer.now() - metrics['start_time']
-        self._metrics.add_jobs_cnt_during_time(
-            proc_time * metrics['num_jobs']
-        )
+    def _after_resource_sim_func(self, prev_ret_val):
+        elapsed_time = self._timer.now() - self._last_measurement_time
+        jobs_time = elapsed_time * self._last_measurement_num_jobs
+        self._metrics.add_jobs_cnt_during_time(jobs_time)
+        self._last_measurement_time = self._timer.now()
+        self._last_measurement_num_jobs = self._resource.num_jobs()
         return prev_ret_val
+
+    def __str__(self):
+        return self._resource.__str__()

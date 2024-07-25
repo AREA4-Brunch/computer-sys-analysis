@@ -1,15 +1,6 @@
-import abc
 import heapq
-from ..utils.timer import ITimer
-
-
-class ITasksScheduler(abc.ABC):
-    """ Provides the interface for registering into the
-        scheduler but not for manipulating it.
-    """
-    @abc.abstractmethod
-    def add(self, schedule_in: float, func: callable, *args, **kwargs):
-        pass
+from ..core.scheduler import ITasksScheduler
+from ..core.timer import ITimer
 
 
 class TasksScheduler(ITasksScheduler):
@@ -60,3 +51,10 @@ class TasksScheduler(ITasksScheduler):
         args = tuple() if has_kwargs else task_desc[1]
         kwargs = task_desc[1] if has_kwargs else dict()
         return (func, args, kwargs)
+
+    def __str__(self) -> str:
+        out = f'Scheduler[\n\ttime: {self._timer.now()}\n'
+        tasks = [ el for el in self._tasks ]
+        while tasks:
+            out += f'\t{heapq.heappop(tasks)}\n\n'
+        return out + '\n]'

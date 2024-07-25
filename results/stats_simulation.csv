@@ -1,0 +1,480 @@
+
+
+K:	0
+
+R:	0.3
+
+Network's Recall Time [sec]:	0.021
+
+Critical resources:	CPU
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3
+
+Usages:	1.000	0.293	0.192	0.207	0.158
+
+Throughputs [jobs/sec]:	47.101	73.301	19.234	13.817	10.533
+
+Avg num of jobs:	1.000	0.356	0.218	0.251	0.175
+
+Is critical resource:	NO	YES	NO	NO	NO
+
+
+
+K:	0
+
+R:	0.55
+
+Network's Recall Time [sec]:	0.027
+
+Critical resources:	CPU
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3
+
+Usages:	1.000	0.552	0.369	0.411	0.281
+
+Throughputs [jobs/sec]:	87.550	138.033	36.850	27.367	18.750
+
+Avg num of jobs:	1.000	0.927	0.507	0.583	0.333
+
+Is critical resource:	NO	YES	NO	NO	NO
+
+
+
+K:	0
+
+R:	0.8
+
+Network's Recall Time [sec]:	0.041
+
+Critical resources:	CPU
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3
+
+Usages:	1.000	0.796	0.534	0.581	0.415
+
+Throughputs [jobs/sec]:	127.370	199.105	53.385	38.751	27.634
+
+Avg num of jobs:	1.000	2.700	0.854	1.052	0.566
+
+Is critical resource:	NO	YES	NO	NO	NO
+
+
+
+K:	0
+
+R:	1.0
+
+Network's Recall Time [sec]:	0.227
+
+Critical resources:	CPU
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3
+
+Usages:	1.000	0.991	0.675	0.733	0.504
+
+Throughputs [jobs/sec]:	159.204	247.807	67.485	48.868	33.618
+
+Avg num of jobs:	1.000	32.255	1.308	1.797	0.779
+
+Is critical resource:	NO	YES	NO	NO	NO
+
+
+
+K:	1
+
+R:	0.3
+
+Network's Recall Time [sec]:	0.047
+
+Critical resources:	Usr disk 1
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1
+
+Usages:	1.000	0.076	0.046	0.048	0.037	0.313
+
+Throughputs [jobs/sec]:	12.513	18.978	4.611	3.224	2.439	12.513
+
+Avg num of jobs:	1.000	0.079	0.047	0.049	0.037	0.380
+
+Is critical resource:	NO	NO	NO	NO	NO	YES
+
+
+
+K:	1
+
+R:	0.55
+
+Network's Recall Time [sec]:	0.057
+
+Critical resources:	Usr disk 1
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1
+
+Usages:	1.000	0.131	0.088	0.094	0.068	0.543
+
+Throughputs [jobs/sec]:	21.721	32.723	8.835	6.235	4.518	21.704
+
+Avg num of jobs:	1.000	0.140	0.093	0.100	0.071	0.825
+
+Is critical resource:	NO	NO	NO	NO	NO	YES
+
+
+
+K:	1
+
+R:	0.8
+
+Network's Recall Time [sec]:	0.081
+
+Critical resources:	Usr disk 1
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1
+
+Usages:	1.000	0.192	0.127	0.147	0.099	0.780
+
+Throughputs [jobs/sec]:	31.251	48.084	12.667	9.784	6.600	31.184
+
+Avg num of jobs:	1.000	0.218	0.136	0.167	0.102	1.898
+
+Is critical resource:	NO	NO	NO	NO	NO	YES
+
+
+
+K:	1
+
+R:	1.0
+
+Network's Recall Time [sec]:	0.668
+
+Critical resources:	Usr disk 1
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1
+
+Usages:	1.000	0.255	0.173	0.185	0.135	0.992
+
+Throughputs [jobs/sec]:	40.967	63.850	17.300	12.333	9.000	39.667
+
+Avg num of jobs:	1.000	0.302	0.193	0.209	0.147	26.645
+
+Is critical resource:	NO	NO	NO	NO	NO	YES
+
+
+
+K:	2
+
+R:	0.3
+
+Network's Recall Time [sec]:	0.048
+
+Critical resources:	Usr disk 1	Usr disk 2
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2
+
+Usages:	0.999	0.138	0.087	0.101	0.067	0.285	0.273
+
+Throughputs [jobs/sec]:	22.287	34.472	8.735	6.751	4.484	11.385	10.902
+
+Avg num of jobs:	0.999	0.148	0.091	0.111	0.070	0.326	0.314
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES
+
+
+
+K:	2
+
+R:	0.55
+
+Network's Recall Time [sec]:	0.059
+
+Critical resources:	Usr disk 1	Usr disk 2
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2
+
+Usages:	1.000	0.266	0.181	0.204	0.127	0.533	0.540
+
+Throughputs [jobs/sec]:	43.003	66.621	18.068	13.618	8.451	21.335	21.585
+
+Avg num of jobs:	1.000	0.318	0.204	0.228	0.140	0.829	0.833
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES
+
+
+
+K:	2
+
+R:	0.8
+
+Network's Recall Time [sec]:	0.094
+
+Critical resources:	Usr disk 1	Usr disk 2
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2
+
+Usages:	1.000	0.403	0.272	0.279	0.221	0.797	0.802
+
+Throughputs [jobs/sec]:	64.068	100.752	27.234	18.567	14.750	31.884	32.067
+
+Avg num of jobs:	1.000	0.554	0.338	0.349	0.257	2.145	2.379
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES
+
+
+
+K:	2
+
+R:	1.0
+
+Network's Recall Time [sec]:	0.366
+
+Critical resources:	Usr disk 1	Usr disk 2
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2
+
+Usages:	1.000	0.490	0.326	0.366	0.252	0.964	0.988
+
+Throughputs [jobs/sec]:	78.470	122.606	32.635	24.384	16.801	38.568	39.502
+
+Avg num of jobs:	1.000	0.747	0.431	0.465	0.294	9.581	17.088
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES
+
+
+
+K:	3
+
+R:	0.3
+
+Network's Recall Time [sec]:	0.049
+
+Critical resources:	Usr disk 1	Usr disk 2	Usr disk 3
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3
+
+Usages:	1.000	0.218	0.137	0.162	0.105	0.285	0.297	0.308
+
+Throughputs [jobs/sec]:	35.637	54.573	13.668	10.801	6.967	11.401	11.885	12.301
+
+Avg num of jobs:	1.000	0.252	0.147	0.184	0.111	0.336	0.352	0.366
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES	YES
+
+
+
+K:	3
+
+R:	0.55
+
+Network's Recall Time [sec]:	0.063
+
+Critical resources:	Usr disk 1	Usr disk 2	Usr disk 3
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3
+
+Usages:	1.000	0.413	0.276	0.309	0.214	0.556	0.538	0.554
+
+Throughputs [jobs/sec]:	66.002	103.237	27.618	20.601	14.267	22.234	21.534	22.151
+
+Avg num of jobs:	1.000	0.568	0.337	0.412	0.245	0.884	0.817	0.877
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES	YES
+
+
+
+K:	3
+
+R:	0.8
+
+Network's Recall Time [sec]:	0.101
+
+Critical resources:	Usr disk 1	Usr disk 2	Usr disk 3
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3
+
+Usages:	1.000	0.598	0.399	0.457	0.289	0.818	0.801	0.781
+
+Throughputs [jobs/sec]:	96.067	149.418	39.900	30.434	19.250	32.700	32.034	31.234
+
+Avg num of jobs:	1.000	1.112	0.572	0.694	0.341	2.601	2.308	2.037
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES	YES
+
+
+
+K:	3
+
+R:	1.0
+
+Network's Recall Time [sec]:	0.409
+
+Critical resources:	Usr disk 1	Usr disk 2	Usr disk 3
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3
+
+Usages:	1.000	0.739	0.500	0.560	0.364	0.977	0.966	0.979
+
+Throughputs [jobs/sec]:	118.422	184.759	49.952	37.318	24.251	39.085	38.652	39.169
+
+Avg num of jobs:	1.000	1.902	0.777	1.039	0.483	22.109	11.383	10.829
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES	YES
+
+
+
+K:	4
+
+R:	0.3
+
+Network's Recall Time [sec]:	0.051
+
+Critical resources:	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4
+
+Usages:	1.000	0.296	0.202	0.213	0.148	0.307	0.298	0.302	0.284
+
+Throughputs [jobs/sec]:	47.685	73.969	20.167	14.167	9.867	12.284	11.934	12.084	11.350
+
+Avg num of jobs:	1.000	0.364	0.235	0.246	0.162	0.372	0.356	0.357	0.339
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES	YES	YES
+
+
+
+K:	4
+
+R:	0.55
+
+Network's Recall Time [sec]:	0.067
+
+Critical resources:	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4
+
+Usages:	1.000	0.543	0.365	0.409	0.273	0.548	0.554	0.562	0.526
+
+Throughputs [jobs/sec]:	87.691	135.679	36.453	27.236	18.218	21.902	22.152	22.485	21.052
+
+Avg num of jobs:	1.000	0.924	0.483	0.555	0.352	0.872	0.904	0.959	0.805
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES	YES	YES
+
+
+
+K:	4
+
+R:	0.8
+
+Network's Recall Time [sec]:	0.114
+
+Critical resources:	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4
+
+Usages:	1.000	0.797	0.531	0.608	0.410	0.794	0.797	0.811	0.763
+
+Throughputs [jobs/sec]:	126.785	199.336	53.101	40.550	27.334	31.767	31.884	32.434	30.517
+
+Avg num of jobs:	1.000	2.749	0.836	1.140	0.573	2.157	2.695	2.356	1.981
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES	YES	YES
+
+
+
+K:	4
+
+R:	1.0
+
+Network's Recall Time [sec]:	0.651
+
+Critical resources:	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4
+
+Usages:	1.000	0.985	0.655	0.724	0.498	0.952	0.978	0.993	0.960
+
+Throughputs [jobs/sec]:	157.637	246.255	65.451	48.251	33.217	38.067	39.134	39.718	38.384
+
+Avg num of jobs:	1.000	35.078	1.243	1.720	0.750	11.761	20.713	17.370	13.621
+
+Is critical resource:	NO	NO	NO	NO	NO	YES	YES	YES	YES
+
+
+
+K:	5
+
+R:	0.3
+
+Network's Recall Time [sec]:	0.051
+
+Critical resources:	CPU
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4	Usr disk 5
+
+Usages:	0.999	0.295	0.208	0.211	0.154	0.242	0.233	0.244	0.254	0.214
+
+Throughputs [jobs/sec]:	47.482	73.691	20.824	14.071	10.237	9.670	9.320	9.770	10.170	8.553
+
+Avg num of jobs:	0.999	0.363	0.239	0.251	0.173	0.288	0.270	0.281	0.302	0.239
+
+Is critical resource:	NO	YES	NO	NO	NO	NO	NO	NO	NO	NO
+
+
+
+K:	5
+
+R:	0.55
+
+Network's Recall Time [sec]:	0.062
+
+Critical resources:	CPU
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4	Usr disk 5
+
+Usages:	1.000	0.558	0.376	0.411	0.290	0.439	0.436	0.439	0.462	0.448
+
+Throughputs [jobs/sec]:	89.043	139.515	37.604	27.420	19.302	17.569	17.452	17.552	18.469	17.919
+
+Avg num of jobs:	1.000	0.953	0.511	0.574	0.368	0.592	0.615	0.601	0.633	0.626
+
+Is critical resource:	NO	YES	NO	NO	NO	NO	NO	NO	NO	NO
+
+
+
+K:	5
+
+R:	0.8
+
+Network's Recall Time [sec]:	0.094
+
+Critical resources:	CPU
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4	Usr disk 5
+
+Usages:	1.000	0.811	0.549	0.600	0.421	0.651	0.663	0.638	0.663	0.620
+
+Throughputs [jobs/sec]:	129.567	202.801	54.934	39.967	28.084	26.050	26.533	25.533	26.500	24.800
+
+Avg num of jobs:	1.000	3.242	0.899	1.090	0.585	1.415	1.296	1.211	1.365	1.092
+
+Is critical resource:	NO	YES	NO	NO	NO	NO	NO	NO	NO	NO
+
+
+
+K:	5
+
+R:	1.0
+
+Network's Recall Time [sec]:	0.578
+
+Critical resources:	CPU
+
+Metric	Generator	CPU	Sd1	Sd2	Sd3	Usr disk 1	Usr disk 2	Usr disk 3	Usr disk 4	Usr disk 5
+
+Usages:	1.000	0.992	0.664	0.747	0.473	0.770	0.800	0.817	0.791	0.786
+
+Throughputs [jobs/sec]:	159.900	248.017	66.400	49.767	31.550	30.783	32.017	32.667	31.633	31.450
+
+Avg num of jobs:	1.000	77.315	1.333	1.823	0.697	2.032	2.325	2.474	1.983	2.114
+
+Is critical resource:	NO	YES	NO	NO	NO	NO	NO	NO	NO	NO
+

@@ -1,16 +1,7 @@
-import abc
-
-
-class ITimer(abc.ABC):
-    """ Does not provide change of time functionality. """
-
-    @abc.abstractmethod
-    def now(self) -> float:
-        pass
+from ..core.timer import ITimer
 
 
 class Timer(ITimer):
-    """ Provides change of time functionality. """
     # _now: float - current time
 
     def __init__(self, start_time: float=0):

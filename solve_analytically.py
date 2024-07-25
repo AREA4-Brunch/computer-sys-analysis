@@ -122,13 +122,16 @@ def calc_alpha_max_from_throughput(
 ):
     # compute the max_alpha so that each lambda_i <= mu_i = 1 / Si
     # lambdas = max_alpha * lambdas_relative <= 1 / S
-    max_alphas = 1 / serv_times / lambdas_relative
+    try:  # try not to add 1e-10 to cause `inf` later as most accurate result
+        max_alphas = 1 / serv_times / lambdas_relative
+    except:  # in case of division by 0
+        max_alphas = 1 / serv_times / (lambdas_relative + 1e-10)
     max_alpha_idx = np.argmin(max_alphas)
     max_alpha = max_alphas[max_alpha_idx]
     # add indices of all max_alpha occurrances in max_alphas
     max_alpha_indices = [ max_alpha_idx ]
     for i in range(max_alpha_idx + 1, max_alphas.shape[0]):
-        if max_alphas[i] == max_alpha:
+        if abs(max_alpha - max_alphas[i]) < 1e-10:  # avoid prec errs
             max_alpha_indices.append(i)
     return max_alpha, np.array(max_alpha_indices, dtype=np.uint)
 

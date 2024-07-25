@@ -46,7 +46,6 @@ PATH_SIMULATION_RESULTS = r'./results/stats_simulation.csv'  # single run result
 
 PATH_SIMULATIONS_AVG_RESULTS = r'./results/stats_simulations_avg.csv'
 
-SIMULATION_AVG_NUM_RERUNS = 4  # avg out results over some num of reruns
+SIMULATION_AVG_NUM_RERUNS = 2  # avg out results over some num of reruns
 
-# SIMULATION_DURATION_MINS = 30  # [mins] - mins of simulated time
 SIMULATION_DURATION_MINS = 1  # [mins] - mins of simulated time

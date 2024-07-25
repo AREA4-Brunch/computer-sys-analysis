@@ -3,8 +3,10 @@ import concurrent.futures
 import threading
 from typing import Callable
 from ..utils.observable import IObservable, Observable
-from ..utils.timer import ITimer, Timer
-from .scheduler import ITasksScheduler, TasksScheduler
+from ..core.timer import ITimer
+from .timer import Timer
+from ..core.scheduler import ITasksScheduler
+from .scheduler import TasksScheduler
 
 
 class ISimulationObservable(abc.ABC):

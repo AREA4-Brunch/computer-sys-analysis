@@ -5,7 +5,7 @@ from .job_generator import JobGenerator
 from ..metrics.resource_metrics import ISimulatedResourceMetrics
 from .processing_time_counter import ProcessingTimeCounter
 from .jobs_counter import JobsCounter
-from ..utils.timer import ITimer
+from ..core.timer import ITimer
 
 
 class IFactoryMethodConfig(abc.ABC):
@@ -106,7 +106,9 @@ class MetricsTrackingResourceFactory(IResourceFactory):
         resource: ISimulatedResource,
         config: MetricsTrackingConfig,
     ) -> ISimulatedResource:
-        if 'throughput' or 'usage' in config.to_track:
+        if ( 'throughput' in config.to_track
+          or 'usage'      in config.to_track
+        ):
             resource = ProcessingTimeCounter(
                 resource, config.timer, config.metrics_registry
             )

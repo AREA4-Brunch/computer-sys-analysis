@@ -1,12 +1,14 @@
 import numpy as np
-from ..utils.timer import ITimer
+from ..core.timer import ITimer
 from ..jobs.job import IJob, Job
 from .resource_interfaces import (
     ISimulatedResource,
 )
-from ..simulation.event import (
-    simulated_events_chain_provider,
+from ..core.event import (
     simulated_func,
+    simulated_events_chain_provider,
+    ISimulatedEvent,
+    SimulatedEvent,
 )
 
 
@@ -25,33 +27,44 @@ class JobGenerator(ISimulatedResource):
         self._alpha = alpha
         self._timer = timer
         self._psrng = psrng
+        self._is_idle = True
 
     @simulated_events_chain_provider()
     @simulated_func(duration=0)
     def insert_job(self, job: IJob):
         """ Generator does not take in any jobs. """
-        return None
+        return
 
     @simulated_events_chain_provider()
     @simulated_func(duration=0)
     def is_idle(self) -> bool:
-        return False
+        return self._is_idle
 
     @simulated_events_chain_provider()
     @simulated_func(duration=0)
-    def has_jobs_waiting(self) -> int:
+    def has_jobs(self) -> int:
         return 1
 
-    @simulated_events_chain_provider()
-    def process_cur_job(self) -> tuple[float, IJob]:
-        proc_time, job = self._gen_new_job()
-        # return round(proc_time), job  # makes time in whole sim int, not float
-        return proc_time, job
+    def process_cur_job(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+        first = SimulatedEvent(self._on_start_process_cur_job)
+        last = first.then(self._on_end_process_cur_job)
+        return first, last
 
     def num_jobs(self) -> int:
         return 1
 
-    def _gen_new_job(self) -> tuple[float, IJob]:
-        generation_duration = self._psrng.exponential(1 / self._alpha)
+    def _on_start_process_cur_job(self) -> tuple[float, None]:
+        self._is_idle = False
+        gen_time = self._psrng.exponential(1 / self._alpha)
+        return gen_time, None
+
+    @simulated_func(duration=0)
+    def _on_end_process_cur_job(self) -> IJob:
         job = Job(self._timer.now())
-        return generation_duration, job
+        self._is_idle = True
+        return job
+
+    def __str__(self):
+        out = '[\n'
+        out += f'\tis_idle: {self._is_idle}'
+        return out + '\n]'

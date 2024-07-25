@@ -23,8 +23,8 @@ class IObservable(abc.ABC):
 
 class Observable(IObservable):
     """ Observable can be used via inheritance or composition.
-        Does not impose any interface on notify strategy of a
-        subscriber and just passes given args in notify.
+        Does not require any interface of notify strategy of a
+        subscriber and just passes given args inside `notify`.
         Groups subscribers by given types of events.
     """
     # _subscribers: dict, subscribers[event] = [ notify_strategies... ]

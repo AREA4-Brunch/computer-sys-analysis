@@ -1,6 +1,6 @@
 import abc
 from ..jobs.job import IJob
-from ..simulation.event import ISimulatedEvent
+from ..core.event import ISimulatedEvent
 
 
 class IResource(abc.ABC):
@@ -43,7 +43,7 @@ class ISimulatedResource(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def has_jobs_waiting(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def has_jobs(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
         """ Returns positive number if any jobs are waiting.
         """
         pass
