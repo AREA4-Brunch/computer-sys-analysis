@@ -6,7 +6,7 @@ from .resource_interfaces import (
 from ..core.event import (
     ISimulatedEvent,
     simulated_func,
-    simulated_events_chain_provider,
+    simulated_events_chain,
 )
 from ..metrics.resource_metrics import ISimulatedResourceMetrics
 
@@ -28,22 +28,27 @@ class ProcessingTimeCounter(ISimulatedResource):
         self._timer = timer
         self._metrics = metrics
 
-    def insert_job(
-        self,
-        *args,
-        **kwargs
-    ) -> tuple[ISimulatedEvent, ISimulatedEvent]:
-        return self._resource.insert_job(*args, **kwargs)
+    def insert_job(self, *job: tuple[IJob]) -> tuple[
+        ISimulatedEvent[[IJob], any] | ISimulatedEvent[[], any],
+        ISimulatedEvent[..., None]
+    ]:
+        return self._resource.insert_job(*job)
 
-    def is_idle(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def is_idle(self) -> tuple[
+        ISimulatedEvent[[], any], ISimulatedEvent[..., bool]
+    ]:
         return self._resource.is_idle()
 
-    def has_jobs(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def has_jobs(self) -> tuple[
+        ISimulatedEvent[[], any], ISimulatedEvent[..., int]
+    ]:
         """ Returns positive number if any jobs are waiting.
         """
         return self._resource.has_jobs()
 
-    def process_cur_job(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def process_cur_job(self) -> tuple[
+        ISimulatedEvent[[], None], ISimulatedEvent[[IJob], IJob]
+    ]:
         metrics = dict()
         first, last = self._before_process_cur_job(metrics)
         last = last.then_(self._resource.process_cur_job())
@@ -53,7 +58,7 @@ class ProcessingTimeCounter(ISimulatedResource):
     def num_jobs(self) -> int:
         return self._resource.num_jobs()
 
-    @simulated_events_chain_provider()
+    @simulated_events_chain
     @simulated_func(duration=0)
     def _before_process_cur_job(self, metrics: dict):
         metrics['start_time'] = self._timer.now()

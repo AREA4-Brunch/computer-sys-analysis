@@ -31,25 +31,34 @@ class IResource(abc.ABC):
 
 class ISimulatedResource(abc.ABC):
     @abc.abstractmethod
-    def insert_job(
-        self,
-        *args,
-        **kwargs
-    ) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def insert_job(self, *job: tuple[IJob]) -> tuple[
+        ISimulatedEvent[[IJob], any] | ISimulatedEvent[[], any],
+        ISimulatedEvent[..., None]
+    ]:
+        """ Arg `job` is optionally passed for in case
+            it is instead provided via `ISimulatedEvent.execute`
+            directly or through event chain.
+        """
         pass
 
     @abc.abstractmethod
-    def is_idle(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def is_idle(self) -> tuple[
+        ISimulatedEvent[[], any], ISimulatedEvent[..., bool]
+    ]:
         pass
 
     @abc.abstractmethod
-    def has_jobs(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def has_jobs(self) -> tuple[
+        ISimulatedEvent[[], any], ISimulatedEvent[..., int]
+    ]:
         """ Returns positive number if any jobs are waiting.
         """
         pass
 
     @abc.abstractmethod
-    def process_cur_job(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def process_cur_job(self) -> tuple[
+        ISimulatedEvent[[], any], ISimulatedEvent[..., IJob]
+    ]:
         pass
 
     @abc.abstractmethod

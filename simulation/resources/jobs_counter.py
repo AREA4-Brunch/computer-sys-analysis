@@ -5,9 +5,10 @@ from .resource_interfaces import (
 from ..core.event import (
     ISimulatedEvent,
     simulated_func,
-    simulated_events_chain_provider,
+    simulated_events_chain,
 )
 from ..metrics.resource_metrics import ISimulatedResourceMetrics
+from ..jobs.job import IJob
 
 
 class JobsCounter(ISimulatedResource):
@@ -31,22 +32,27 @@ class JobsCounter(ISimulatedResource):
         self._last_measurement_time = self._timer.now()
         self._last_measurement_num_jobs = 0
 
-    def insert_job(
-        self,
-        *args,
-        **kwargs
-    ) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def insert_job(self, *job: tuple[IJob]) -> tuple[
+        ISimulatedEvent[[IJob], any] | ISimulatedEvent[[], any],
+        ISimulatedEvent[[None], None]
+    ]:
         return self._process_sim_func(
-            self._resource.insert_job, *args, **kwargs
+            self._resource.insert_job, *job
         )
 
-    def is_idle(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def is_idle(self) -> tuple[
+        ISimulatedEvent[[], any], ISimulatedEvent[[bool], bool]
+    ]:
         return self._process_sim_func(self._resource.is_idle)
 
-    def has_jobs(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def has_jobs(self) -> tuple[
+        ISimulatedEvent[[], any], ISimulatedEvent[[int], int]
+    ]:
         return self._process_sim_func(self._resource.has_jobs)
 
-    def process_cur_job(self) -> tuple[ISimulatedEvent, ISimulatedEvent]:
+    def process_cur_job(self) -> tuple[
+        ISimulatedEvent[[], any], ISimulatedEvent[[IJob], IJob]
+    ]:
         return self._process_sim_func(self._resource.process_cur_job)
 
     def num_jobs(self) -> int:
@@ -66,7 +72,7 @@ class JobsCounter(ISimulatedResource):
         )
         return first, last
 
-    @simulated_events_chain_provider()
+    @simulated_events_chain
     @simulated_func(duration=0)
     def _before_resource_sim_func(self, prev_ret_val=None):
         """ prev_ret_val=None because there may have been no events before
